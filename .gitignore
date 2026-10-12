@@ -1,0 +1,23 @@
+# Dependencias
+node_modules/
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# Archivos generados
+dist/
+build/
+.next/
+
+# Archivos de registro
+*.log
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+apps/*/dist
+apps/*/node_modules
+packages/*/dist
