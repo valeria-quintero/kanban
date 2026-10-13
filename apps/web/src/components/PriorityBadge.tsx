@@ -16,7 +16,7 @@ export function PriorityBadge({ priority }: Props) {
     const { label, color } = PRIORITIES[priority]
 
   return (
-    <div className="inline-flex items-center gap-x-2.5 px-3 py-1 border border-slate-200 rounded-full bg-white">
+    <div className="inline-flex items-center gap-x-2.5 px-3 py-1 border border-slate-200 rounded-full bg-white hover:cursor-pointer">
       <div className={`size-2.5 rounded-full ${color}`} aria-hidden="true" />
       <span className="text-sm font-medium text-slate-700">
         {label}

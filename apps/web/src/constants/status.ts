@@ -5,4 +5,4 @@ export const STATUSES = {
     DONE: { label: 'Hecho' }
 } as const
 
-export type Status = keyof typeof STATUSES
+export type TaskStatus = keyof typeof STATUSES
