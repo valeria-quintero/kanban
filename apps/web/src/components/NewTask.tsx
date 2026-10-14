@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { PRIORITIES, PRIORITY_KEYS, type Priority } from '../constants/priorities';
+import { PRIORITIES, PRIORITY_KEYS } from '../constants/priorities';
 import { PriorityBadge } from './PriorityBadge';
 import { STATUS_KEYS, STATUSES, type TaskStatus } from '../constants/status';
-import type { CreateTaskInput, Task } from '../types/task';
+import type { CreateTaskInput } from '../types/task';
 
 export default function NewTask() {
   
@@ -25,7 +25,7 @@ export default function NewTask() {
     setForm({ ...form, status:e.target.value as TaskStatus})
   }
 
-  const handlerSubmitForm = (e) => {
+  const handlerSubmitForm = () => {
     console.log(form)
   }
 
@@ -105,23 +105,29 @@ export default function NewTask() {
           </div>
 
           {/* Prioridad */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+          <fieldset>
+            <legend className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
               Prioridad <span className="text-red-500">*</span>
-            </label>
+            </legend>
             <div className="grid grid-cols-4 gap-2">
               {PRIORITY_KEYS.map((item) => {
                 const isSelected = form.priority === item 
                 return ( 
-                  <div key={item} onClick={ () => setForm({ ...form, priority:item }) } className={`hover:cursor-pointer ${isSelected ? 'ring-blue-600' : 'opacity-60'}`}>
+                  <button
+                    key={item}
+                    type="button"
+                    aria-pressed={isSelected}
+                    onClick={() => setForm({ ...form, priority: item })}
+                    className={`w-full rounded-full hover:cursor-pointer ${isSelected ? 'ring-2 ring-blue-600' : 'opacity-60'}`}
+                  >
                     <PriorityBadge priority={PRIORITIES[item]} />
-                  </div>
+                  </button>
                 )
               })}
             </div>
 
 
-          </div>
+          </fieldset>
         </div>
 
         {/* Pie de página */}
