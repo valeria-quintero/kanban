@@ -1,13 +1,11 @@
 import './App.css'
 import { PriorityBadge } from './components/PriorityBadge'
+import { PRIORITIES } from './constants/priorities'
 
 function App() {
   return (
-    <div className="p-6">
-      <PriorityBadge priority="LOW" />
-      <PriorityBadge priority="MEDIUM" />
-      <PriorityBadge priority="HIGH" />
-      <PriorityBadge priority="URGENT" />
+    <div>
+      
     </div>
   )
 }
