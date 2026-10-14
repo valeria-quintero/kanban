@@ -1,8 +1,34 @@
-import React from 'react';
-import { PRIORITIES } from '../constants/priorities';
+import { useState } from 'react';
+import { PRIORITIES, PRIORITY_KEYS, type Priority } from '../constants/priorities';
 import { PriorityBadge } from './PriorityBadge';
+import { STATUS_KEYS, STATUSES, type TaskStatus } from '../constants/status';
+import type { CreateTaskInput, Task } from '../types/task';
 
 export default function NewTask() {
+  
+  const [form, setForm] = useState<CreateTaskInput>({
+    title: '',
+    description: '',
+    status: 'BACKLOG',
+    priority: 'MEDIUM'
+  })
+
+  const handlerOnChangeTitle = (e) => {
+    setForm({ ...form, title:e.target.value })
+  }
+
+  const handlerOnChangeDescription = (e) => {
+    setForm({ ...form, description:e.target.value })
+  }
+
+  const handlerOnChangeState = (e) => {
+    setForm({ ...form, status:e.target.value as TaskStatus})
+  }
+
+  const handlerSubmitForm = (e) => {
+    console.log(form)
+  }
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-slate-900/50 p-4">
       <div className="w-full max-w-xl bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden font-sans">
@@ -38,6 +64,7 @@ export default function NewTask() {
               type="text" 
               placeholder="Ej. Revisar contrato con proveedor" 
               className="w-full px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              onChange={handlerOnChangeTitle}
             />
           </div>
 
@@ -50,6 +77,7 @@ export default function NewTask() {
               rows={4}
               placeholder="Contexto, criterios de aceptación o enlaces relevantes"
               className="w-full px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
+              onChange={handlerOnChangeDescription}
             ></textarea>
           </div>
 
@@ -59,10 +87,14 @@ export default function NewTask() {
               Estado <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <select className="w-full px-3.5 py-2.5 text-sm text-slate-800 bg-white border border-slate-200 rounded-lg appearance-none focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 pr-10">
-                <option>Backlog</option>
-                <option>En progreso</option>
-                <option>Completado</option>
+              <select className="w-full px-3.5 py-2.5 text-sm text-slate-800 bg-white border border-slate-200 rounded-lg appearance-none focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 pr-10" onChange={handlerOnChangeState}>
+                {STATUS_KEYS.map((item) => {
+                  return (
+                    <option value={item} key={item} >
+                      {STATUSES[item].label}
+                    </option>
+                  )
+                })}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-400">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -78,18 +110,17 @@ export default function NewTask() {
               Prioridad <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-4 gap-2">
-              {/* Baja */}
-              <PriorityBadge priority={PRIORITIES.LOW}></PriorityBadge>
-
-              {/* Media (Seleccionada) */}
-              <PriorityBadge priority={PRIORITIES.MEDIUM}></PriorityBadge>
-
-              {/* Alta */}
-              <PriorityBadge priority={PRIORITIES.HIGH}></PriorityBadge>
-
-              {/* Crítica */}
-              <PriorityBadge priority={PRIORITIES.URGENT}></PriorityBadge>
+              {PRIORITY_KEYS.map((item) => {
+                const isSelected = form.priority === item 
+                return ( 
+                  <div key={item} onClick={ () => setForm({ ...form, priority:item }) } className={`hover:cursor-pointer ${isSelected ? 'ring-blue-600' : 'opacity-60'}`}>
+                    <PriorityBadge priority={PRIORITIES[item]} />
+                  </div>
+                )
+              })}
             </div>
+
+
           </div>
         </div>
 
@@ -100,7 +131,7 @@ export default function NewTask() {
             <button className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors">
               Cancelar
             </button>
-            <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+            <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm" onClick={handlerSubmitForm}>
               Crear tarea
             </button>
           </div>

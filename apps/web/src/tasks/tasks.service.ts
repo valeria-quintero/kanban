@@ -1,30 +1,15 @@
 import { request } from "../api/tasks";
+import type { Priority } from "../constants/priorities";
+import type { CreateTaskInput, Task } from "../types/task";
 
-interface User {
-    id: number,
-    name: string,
-    email: string
+export function getTasks(priority?: Priority): Promise<Task[]> {
+  const path = priority ? `/tasks?priority=${priority}` : '/tasks'
+  return request<Task[]>(path)
 }
 
-interface Task {
-    id: number,
-    title: string,
-    status: string
-}
-
-export async function getUsers(): Promise<User[]> {
-    return request<User[]>('/users')
-}
-
-export async function getTasks(): Promise<Task[]> {
-    return request<Task[]>('/tasks')
-}
-
-export async function createTask(title:string): Promise<Task> {
+export async function createTask(task:CreateTaskInput): Promise<Task> {
     return request<Task>('/tasks', {
         method: 'POST',
-        body: JSON.stringify({
-            title: title
-        })
+        body: JSON.stringify(task)
     })
 }

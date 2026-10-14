@@ -2,7 +2,7 @@ import type { TaskStatus } from '../constants/status';
 import type { Priority } from '../constants/priorities';
 
 export interface Task {
-    id: string
+    id?: string
     title: string
     description?: string
     status: TaskStatus
@@ -15,6 +15,7 @@ export interface Task {
 export interface CreateTaskInput {
     title: string
     description?: string
+    status: TaskStatus
     priority: Priority
 }
 

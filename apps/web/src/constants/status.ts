@@ -6,3 +6,5 @@ export const STATUSES = {
 } as const
 
 export type TaskStatus = keyof typeof STATUSES
+
+export const STATUS_KEYS = Object.keys(STATUSES) as TaskStatus[];
