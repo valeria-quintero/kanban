@@ -1,20 +1,22 @@
+import { STATUSES, type TaskStatus } from '../constants/status';
 import type { Task } from '../types/task';
 import TaskCard from './TaskCard'; // Asegúrate de importar tu componente TaskCard
 
 interface TaskColumnProps {
   title: string;
-  tasks: Task[]
+  tasks: Task[];
+  status: TaskStatus
 }
 
-export default function TaskColumn({ title, tasks }: TaskColumnProps) {
+export default function TaskColumn({ title, tasks, status }: TaskColumnProps) {
   return (
-    <div className="bg-[#f8fafc] rounded-3xl p-5 w-80 flex flex-col gap-4 border border-slate-100 shadow-sm">
+    <div className="bg-[#f8fafc] rounded-3xl p-5 flex flex-col gap-4 border border-slate-100 shadow-sm">
       {/* Cabecera de la columna */}
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-2.5">
           {/* Indicador de punto azul */}
-          <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
-          <h3 className="font-bold text-slate-800 tracking-wide text-sm">
+          <span className={`w-2.5 h-2.5 rounded-full ${STATUSES[status].dot}`}></span>
+          <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wider text-xs">
             {title}
           </h3>
           {/* Contador dinámico basado en la longitud del arreglo */}
