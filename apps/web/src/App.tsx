@@ -1,12 +1,12 @@
 import './App.css'
-import NewTask from './components/NewTask'
-import TaskCard from './components/TaskCard'
+import TaskColumn from './components/TaskColumn'
+import { mockTasks } from './tasks/tasks.mock'
 
 function App() {
+
   return (
     <div>
-
-      <TaskCard />
+      <TaskColumn title='Por hacer' tasks={mockTasks.filter((tarea) => tarea.status === 'BACKLOG')} />
     </div>
   )
 }

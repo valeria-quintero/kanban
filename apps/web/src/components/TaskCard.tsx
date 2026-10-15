@@ -1,10 +1,14 @@
 import { PRIORITIES } from "../constants/priorities";
-import { mockTasks } from "../tasks/tasks.mock";
+import type { Task } from "../types/task";
 import { PriorityBadge } from "./PriorityBadge";
 
-const task = mockTasks[3]
+//const task = mockTasks[3]
 
-export default function TaskCard() {
+interface Props {
+  task: Task
+}
+
+export default function TaskCard({ task }: Props) {
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 max-w-md">
       <div className="flex items-center justify-between mb-4">
