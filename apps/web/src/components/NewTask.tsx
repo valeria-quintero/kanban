@@ -118,7 +118,7 @@ export default function NewTask() {
                     type="button"
                     aria-pressed={isSelected}
                     onClick={() => setForm({ ...form, priority: item })}
-                    className={`w-full rounded-full hover:cursor-pointer ${isSelected ? 'ring-2 ring-blue-600' : 'opacity-60'}`}
+                    className={`w-full rounded-full hover:cursor-pointer ${isSelected ? 'ring-blue-600' : 'opacity-60'}`}
                   >
                     <PriorityBadge priority={PRIORITIES[item]} />
                   </button>

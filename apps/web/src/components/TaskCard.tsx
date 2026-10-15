@@ -1,3 +1,9 @@
+import { PRIORITIES } from "../constants/priorities";
+import { mockTasks } from "../tasks/tasks.mock";
+import { PriorityBadge } from "./PriorityBadge";
+
+const task = mockTasks[3]
+
 export default function TaskCard() {
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 max-w-md">
@@ -7,8 +13,8 @@ export default function TaskCard() {
           <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
             <path d="M4 2h2v20H4V2m16 0H8v12h12V2Z" />
           </svg>
-          Alta
         </span>
+        <PriorityBadge priority={PRIORITIES[task.priority]} />
 
         {/* Iconos de acción */}
         <div className="flex items-center gap-4 text-gray-400">
@@ -29,12 +35,12 @@ export default function TaskCard() {
 
       {/* Título */}
       <h2 className="text-xl font-bold text-slate-900 mb-3">
-        Definir el esquema de la API de tareas
+        {task.title}
       </h2>
 
       {/* Descripción */}
       <p className="text-slate-600 text-sm leading-relaxed">
-        Endpoints para crear, actualizar, mover y eliminar tareas. Incluir códigos de error y versionado.
+        {task.description}
       </p>
     </div>
   );
