@@ -1,4 +1,6 @@
 import { STATUSES, type TaskStatus } from '../constants/status';
+import { useTaskStore } from '../tasks/use-task-storage';
+import type { Priority } from '../constants/priorities';
 import type { Task } from '../types/task';
 import TaskCard from './TaskCard'; // Asegúrate de importar tu componente TaskCard
 
@@ -9,6 +11,9 @@ interface TaskColumnProps {
 }
 
 export default function TaskColumn({ title, tasks, status }: TaskColumnProps) {
+
+  const priority = useTaskStore((s) => s.priority)
+
   return (
     <div className="bg-[#f8fafc] rounded-3xl p-5 flex flex-col gap-4 border border-slate-100 shadow-sm">
       {/* Cabecera de la columna */}
@@ -38,7 +43,13 @@ export default function TaskColumn({ title, tasks, status }: TaskColumnProps) {
 
       {/* Contenedor de las tarjetas mapeando el arreglo de tareas */}
       <div className="flex flex-col gap-3.5">
-        {tasks.map((task) => (
+        {tasks.filter(task => {
+          if (priority === 'All' || !priority) {
+            return true
+          }
+
+          return task.priority === priority
+        }).map(task => (
           <TaskCard key={task.id} task={task} />
         ))}
       </div>
