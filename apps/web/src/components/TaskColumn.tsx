@@ -1,6 +1,5 @@
 import { STATUSES, type TaskStatus } from '../constants/status';
 import { useTaskStore } from '../tasks/use-task-storage';
-import type { Priority } from '../constants/priorities';
 import type { Task } from '../types/task';
 import TaskCard from './TaskCard'; // Asegúrate de importar tu componente TaskCard
 

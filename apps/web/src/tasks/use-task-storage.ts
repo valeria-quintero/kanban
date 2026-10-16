@@ -3,10 +3,16 @@ import type { Priority } from "../constants/priorities";
 
 interface TaskState {
     priority: Priority | 'All',
-    priorityChange: (prio: Priority | 'All') => void
+    priorityChange: (prty: Priority | 'All') => void,
+
+    searchTerm: string,
+    setSearchTerm: (term: string) => void
 }
 
 export const useTaskStore = create<TaskState>() ((set) => ({
     priority: 'All',
-    priorityChange: (prio: Priority | 'All') => set((state) => ({ priority: prio }))
+    priorityChange: (prty: Priority | 'All') => set(() => ({ priority: prty })),
+
+    searchTerm: '',
+    setSearchTerm: (term: string) => set(() => ({searchTerm: term}))
 }))

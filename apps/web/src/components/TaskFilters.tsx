@@ -6,8 +6,16 @@ import { useTaskStore } from "../tasks/use-task-storage";
 export function FilterBar() {
 
     const priorityChange = useTaskStore((s) => s.priorityChange)
+    const searchTerm = useTaskStore((s) => s.searchTerm)
+    const setSearchTerm = useTaskStore((s) => s.setSearchTerm)
 
     const [priority, setPriority] = useState<Priority | 'All'>()
+
+    const handlerOnChangeSearchTerm = (e) => {
+      setSearchTerm(e.target.value)
+    }
+
+    console.log(searchTerm)
 
   return (
     <div className="flex items-center gap-4 p-4 bg-slate-50/50">
@@ -27,6 +35,8 @@ export function FilterBar() {
           type="text"
           placeholder="Buscar por título o descripción"
           className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-slate-200 rounded-lg text-slate-700 placeholder-slate-400 outline-none"
+          value={searchTerm}
+          onChange={handlerOnChangeSearchTerm}
         />
       </div>
 
