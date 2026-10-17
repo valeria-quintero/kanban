@@ -1,15 +1,28 @@
 import { useQuery } from "@tanstack/react-query";
 import { mockTasks } from "./tasks.mock";
 import type { Priority } from "../constants/priorities";
-import type { Task } from "../types/task";
+import { useTaskStore } from "./use-task-storage";
 
-export function useTask(priority?: Priority) {
+
+export function useTask(priorityOverride?: Priority | 'All') {
+
+    const storePriority = useTaskStore((s) => s.priority)
+
+    //Si pasan una prioridad con el hook-usarla
+    //si no-usar el store
+    const priority = priorityOverride ?? storePriority
+
     const query = useQuery({
-        queryKey: ['Task'],
+        queryKey: ['Task', priority],
         queryFn: () => {
-            const response = mockTasks
-            if (!response) throw new Error ('Imposible conectarse con la API')
-            return response as Task[]
+            if (priority === 'All') {
+                return (
+                    mockTasks
+                )
+            }
+                return (
+                    mockTasks.filter((t) => t.priority === priority)
+                )
         },
         staleTime: 30_000,
 

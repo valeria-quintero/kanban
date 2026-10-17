@@ -13,8 +13,18 @@ export default function NewTask() {
     priority: 'MEDIUM'
   })
 
+  const [titleError, setTitleError] = useState<string | null>(null)
+
   const handlerOnChangeTitle = (e) => {
     setForm({ ...form, title:e.target.value })
+    if (titleError) setTitleError(null)
+  }
+
+  const validateTitle = (title: string): string | null => {
+    const value = title.trim()
+    if (!value) return 'El título es obligatorio'
+    if (value.length < 3) return 'El título debe tener al menos 3 caracteres'
+    return null
   }
 
   const handlerOnChangeDescription = (e) => {
@@ -26,6 +36,11 @@ export default function NewTask() {
   }
 
   const handlerSubmitForm = () => {
+    const error = validateTitle(form.title)
+    if (error) {
+      setTitleError(error)
+      return
+    }
     console.log(form)
   }
 
@@ -63,9 +78,19 @@ export default function NewTask() {
             <input 
               type="text" 
               placeholder="Ej. Revisar contrato con proveedor" 
-              className="w-full px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className={`w-full px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 bg-white border rounded-lg focus:outline-none focus:ring-1 ${
+                titleError
+                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                  : 'border-slate-200 focus:border-blue-500 focus:ring-blue-500'
+              }`}
+              value={form.title}
               onChange={handlerOnChangeTitle}
+              aria-invalid={!!titleError}
+              aria-describedby={titleError ? 'title-error' : undefined}
             />
+            {titleError && (
+              <p id="title-error" className="mt-1.5 text-xs text-red-600">{titleError}</p>
+            )}
           </div>
 
           {/* Descripción */}
