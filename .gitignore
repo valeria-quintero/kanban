@@ -22,3 +22,6 @@ apps/*/dist
 apps/*/node_modules
 packages/*/dist
 *.tsbuildinfo
+
+# Prisma client generado
+src/generated/
