@@ -1,6 +1,10 @@
 import { useTask } from "../tasks/use-task";
 
-export default function Header() {
+type HeaderProps = {
+    onNewTask: () => void
+}
+
+export default function Header({ onNewTask }: HeaderProps) {
     const { tasks } = useTask()
     const totalTasks = tasks.length
     const completedTasks = tasks.filter((t) => t.status === 'DONE').length
@@ -22,6 +26,7 @@ export default function Header() {
 
             <button
                 type="button"
+                onClick={onNewTask}
                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 transition-colors"
             >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">

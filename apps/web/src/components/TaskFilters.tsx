@@ -1,15 +1,15 @@
-import { useState } from "react";
-import { PRIORITIES, type Priority, PRIORITY_KEYS } from "../constants/priorities";
+import { PRIORITIES, PRIORITY_KEYS } from "../constants/priorities";
 import { PriorityBadge } from "./PriorityBadge";
 import { useTaskStore } from "../tasks/use-task-storage";
 
 export function FilterBar() {
 
+    const priority = useTaskStore((s) => s.priority)
     const priorityChange = useTaskStore((s) => s.priorityChange)
+    
     const searchTerm = useTaskStore((s) => s.searchTerm)
     const setSearchTerm = useTaskStore((s) => s.setSearchTerm)
 
-    const [priority, setPriority] = useState<Priority | 'All'>()
 
     const handlerOnChangeSearchTerm = (e) => {
       setSearchTerm(e.target.value)
@@ -44,10 +44,7 @@ export function FilterBar() {
       <div className="flex items-center gap-2">
         <span className="text-sm text-slate-500 font-medium mr-1">Prioridad</span>
 
-        <button type="button" aria-pressed={priority === 'All'} onClick={() => {
-            setPriority('All')
-            priorityChange('All')
-        }} className={`w-full rounded-full hover:cursor-pointer ${priority === 'All' ? 'ring-blue-600' : 'opacity-60'}`} >
+        <button type="button" aria-pressed={priority === 'All'} onClick={() => priorityChange('All')} className={`w-full rounded-full hover:cursor-pointer ${priority === 'All' ? 'ring-blue-600' : 'opacity-60'}`} >
             <div className="inline-flex flex items-center justify-center gap-x-2.5 px-3 py-1 border border-slate-200 rounded-full bg-white hover:cursor-pointer">
                 <div className='size-2.5 rounded-full bg-black' aria-hidden="true" />
                     <span className="text-sm font-medium text-slate-700">
@@ -63,10 +60,7 @@ export function FilterBar() {
                     key={item}
                     type="button"
                     aria-pressed={isSelected}
-                    onClick={() => {
-                        setPriority(item)
-                        priorityChange(item)
-                    }}
+                    onClick={() => priorityChange(item)}
                     className={`w-full rounded-full hover:cursor-pointer ${isSelected ? 'ring-blue-600' : 'opacity-60'}`}>
 
                 <PriorityBadge key={item} priority={PRIORITIES[item]} />
