@@ -9,7 +9,7 @@ import { PRIORITIES } from "../constants/priorities";
 // };
 
 interface Props {
-    priority: (typeof PRIORITIES) [keyof typeof PRIORITIES] //keyof: label y color
+    priority: (typeof PRIORITIES) [keyof typeof PRIORITIES]
 }
 
 export function PriorityBadge({ priority }: Props) {

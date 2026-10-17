@@ -4,7 +4,11 @@ import { PriorityBadge } from './PriorityBadge';
 import { STATUS_KEYS, STATUSES, type TaskStatus } from '../constants/status';
 import type { CreateTaskInput } from '../types/task';
 
-export default function NewTask() {
+type NewTaskProps = {
+  onClose: () => void
+}
+
+export default function NewTask({ onClose }: NewTaskProps) {
   
   const [form, setForm] = useState<CreateTaskInput>({
     title: '',
@@ -13,8 +17,18 @@ export default function NewTask() {
     priority: 'MEDIUM'
   })
 
+  const [titleError, setTitleError] = useState<string | null>(null)
+
   const handlerOnChangeTitle = (e) => {
     setForm({ ...form, title:e.target.value })
+    if (titleError) setTitleError(null)
+  }
+
+  const validateTitle = (title: string): string | null => {
+    const value = title.trim()
+    if (!value) return 'El título es obligatorio'
+    if (value.length < 3) return 'El título debe tener al menos 3 caracteres'
+    return null
   }
 
   const handlerOnChangeDescription = (e) => {
@@ -26,11 +40,16 @@ export default function NewTask() {
   }
 
   const handlerSubmitForm = () => {
+    const error = validateTitle(form.title)
+    if (error) {
+      setTitleError(error)
+      return
+    }
     console.log(form)
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-900/50 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
       <div className="w-full max-w-xl bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden font-sans">
         
         {/* Cabecera */}
@@ -46,7 +65,7 @@ export default function NewTask() {
               <p className="text-xs text-slate-500">Completa los datos para añadirla al tablero</p>
             </div>
           </div>
-          <button className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
+          <button type="button" onClick={onClose} aria-label="Cerrar" className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -63,9 +82,19 @@ export default function NewTask() {
             <input 
               type="text" 
               placeholder="Ej. Revisar contrato con proveedor" 
-              className="w-full px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              className={`w-full px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 bg-white border rounded-lg focus:outline-none focus:ring-1 ${
+                titleError
+                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                  : 'border-slate-200 focus:border-blue-500 focus:ring-blue-500'
+              }`}
+              value={form.title}
               onChange={handlerOnChangeTitle}
+              aria-invalid={!!titleError}
+              aria-describedby={titleError ? 'title-error' : undefined}
             />
+            {titleError && (
+              <p id="title-error" className="mt-1.5 text-xs text-red-600">{titleError}</p>
+            )}
           </div>
 
           {/* Descripción */}
@@ -118,7 +147,7 @@ export default function NewTask() {
                     type="button"
                     aria-pressed={isSelected}
                     onClick={() => setForm({ ...form, priority: item })}
-                    className={`w-full rounded-full hover:cursor-pointer ${isSelected ? 'ring-2 ring-blue-600' : 'opacity-60'}`}
+                    className={`w-full rounded-full hover:cursor-pointer ${isSelected ? 'ring-blue-600' : 'opacity-60'}`}
                   >
                     <PriorityBadge priority={PRIORITIES[item]} />
                   </button>
@@ -134,7 +163,7 @@ export default function NewTask() {
         <div className="flex items-center justify-between px-6 py-4 bg-slate-50 border-t border-slate-100">
           <span className="text-xs text-slate-400">Se muestra al instante y se confirma con el servidor</span>
           <div className="flex items-center gap-3">
-            <button className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors">
               Cancelar
             </button>
             <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm" onClick={handlerSubmitForm}>

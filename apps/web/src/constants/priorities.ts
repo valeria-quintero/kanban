@@ -7,4 +7,4 @@ export const PRIORITIES = {
 
 export type Priority = keyof typeof PRIORITIES
 
-export const PRIORITY_KEYS = Object.keys(PRIORITIES) as Priority[];
+export const PRIORITY_KEYS = Object.keys(PRIORITIES) as Priority[]; //as -> parse()
