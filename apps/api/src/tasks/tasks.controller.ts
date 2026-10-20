@@ -37,7 +37,9 @@ export class TasksController {
   }
 
   @Patch(':id/move')
-  move(@Param('id', ParseUUIDPipe) id: string, @Body() dto: MoveTaskDto) {
+  move(
+    @Param('id', ParseUUIDPipe) id: string, 
+    @Body() dto: MoveTaskDto) {
     return this.tasksService.move(id, dto);
   }
 }

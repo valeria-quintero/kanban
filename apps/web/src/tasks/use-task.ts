@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { mockTasks } from "./tasks.mock";
-import type { Priority } from "../constants/priorities";
+import { getTasks } from "./tasks.service";
+import type { PriorityFilter } from "../constants/priorities";
 import { useTaskStore } from "./use-task-storage";
 
 
-export function useTask(priorityOverride?: Priority | 'All') {
+export function useTask(priorityOverride?: PriorityFilter) {
 
     const storePriority = useTaskStore((s) => s.priority)
 
@@ -14,16 +14,7 @@ export function useTask(priorityOverride?: Priority | 'All') {
 
     const query = useQuery({
         queryKey: ['Task', priority],
-        queryFn: () => {
-            if (priority === 'All') {
-                return (
-                    mockTasks
-                )
-            }
-                return (
-                    mockTasks.filter((t) => t.priority === priority)
-                )
-        },
+        queryFn: () => getTasks(priority),
         staleTime: 30_000,
 
     })

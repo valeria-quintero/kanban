@@ -10,3 +10,6 @@ export const PRIORITIES = {
 } as const satisfies Record<Priority, { label: string; color: string }>
 
 export const PRIORITY_KEYS = Object.keys(PRIORITIES) as Priority[]; //as -> parse()
+
+// 'All' solo existe en la UI: para la API equivale a no enviar el filtro
+export type PriorityFilter = Priority | 'All'
