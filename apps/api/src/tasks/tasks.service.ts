@@ -29,6 +29,7 @@ export class TasksService {
 
   async findAll({ priority }: QueryTasksDto): Promise<TaskDto[]> {
     const tasks = await this.prisma.task.findMany({
+      //filtro
       where: { priority },
       orderBy: [{ orderIndex: 'asc' }, { createdAt: 'asc' }],
     });
@@ -36,10 +37,12 @@ export class TasksService {
   }
 
   async create(dto: CreateTaskDto): Promise<TaskDto> {
+    //si no se manda status, se usa BACKLOG
     const status = dto.status ?? 'BACKLOG';
 
     // La tarjeta nueva va al final de su columna.
     const task = await this.prisma.$transaction(async (tx) => {
+      // cuál es el orderIndex más grande en esa columna
       const { _max } = await tx.task.aggregate({
         where: { status },
         _max: { orderIndex: true },
@@ -50,6 +53,7 @@ export class TasksService {
           description: dto.description,
           status,
           priority: dto.priority,
+          // si -max.orderIndex es null (-1 + 1 = 0)
           orderIndex: (_max.orderIndex ?? -1) + 1,
         },
       });
@@ -79,24 +83,36 @@ export class TasksService {
    */
   async move(id: string, dto: MoveTaskDto): Promise<TaskDto> {
     const moved = await this.prisma.$transaction(async (tx) => {
+      //Busca la tarjeta, si no existe = 404
       const task = await tx.task.findUnique({ where: { id } });
       if (!task) throw new NotFoundException(`Task ${id} not found`);
 
+      //Guarda de dónde viene
       const { status: from, orderIndex: oldIndex } = task;
+      //y a dónde va
       const to = dto.status;
 
+      //La tarea se queda en la misma columna:
       if (from === to) {
+        //cuenta cuántas hay
         const count = await tx.task.count({ where: { status: to } });
+        //la ajusta a la última posición
         const newIndex = Math.min(dto.newOrderIndex, count - 1);
 
+        //Si se pasa de la posición 0 a la 2
         if (newIndex > oldIndex) {
           await tx.task.updateMany({
+            //busca las tareas mayores a 0 y menores o iguales a 2
             where: { status: to, orderIndex: { gt: oldIndex, lte: newIndex } },
+            //les resta 1 para mantener coherencia en los índices
             data: { orderIndex: { decrement: 1 } },
           });
+          //Si se pasa de la posición 3 a la 1
         } else if (newIndex < oldIndex) {
           await tx.task.updateMany({
+            //Busca las tareas mayores o iguales a 1 y menores a 3
             where: { status: to, orderIndex: { gte: newIndex, lt: oldIndex } },
+            //les aumenta 1 para mantener la coherencia y evitar huecos
             data: { orderIndex: { increment: 1 } },
           });
         }
@@ -105,14 +121,21 @@ export class TasksService {
 
       // Cambio de columna: cerrar el hueco en el origen y abrir sitio en el destino.
       await tx.task.updateMany({
+        //de la columna de origen, los índices que sean mayores al índice de la tarea que se va
         where: { status: from, orderIndex: { gt: oldIndex } },
+        //se les quita 1
         data: { orderIndex: { decrement: 1 } },
       });
 
+      //cuenta las tareas que hay en el destino
       const destCount = await tx.task.count({ where: { status: to } });
+
+      //Math.min busca el menor entre el índice que tendrá la tarea que se mueve y la cuenta de las tareas de la columna de destino para establecer un tope.
       const newIndex = Math.min(dto.newOrderIndex, destCount);
       await tx.task.updateMany({
+        //en la columna del destino, los índices que sean mayores o iguales al índice que llega
         where: { status: to, orderIndex: { gte: newIndex } },
+        //se les aumenta 1
         data: { orderIndex: { increment: 1 } },
       });
       return tx.task.update({
@@ -133,3 +156,4 @@ export class TasksService {
     return error;
   }
 }
+

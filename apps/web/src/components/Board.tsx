@@ -27,7 +27,6 @@ export default function Board({ onEditTask }: BoardProps) {
     const { tasks: allTasks } = useTask('All')
     const searchTerm = useTaskStore((s) => s.searchTerm)
     const { mutate: moveTask } = useMoveTask()
-
     const filteredTasks = tasks.filter((t) => {
         const title = t.title.toLowerCase()
         const description = (t.description ?? "").toLowerCase()
@@ -38,11 +37,18 @@ export default function Board({ onEditTask }: BoardProps) {
     })
 
     const handleDragEnd = ({ draggableId, source, destination }: DropResult) => {
+        //se suelta fuera de cualquier columna
         if (!destination) return
+        //se suelta donde estaba
         if (destination.droppableId === source.droppableId && destination.index === source.index) return
 
+        //el id de cada columna es su estado
         const status = destination.droppableId as TaskStatus
+
+        //tarjetas que se ven, con filtros, de la columna destino
         const visible = filteredTasks.filter((t) => t.status === status && t.id !== draggableId)
+
+        //tarjetas de la columna
         const column = allTasks.filter((t) => t.status === status && t.id !== draggableId)
         const newOrderIndex = toColumnIndex(visible, column, destination.index)
 

@@ -6,10 +6,14 @@ import { createTask, moveTask, updateTask } from "./tasks.service";
 const TASKS_KEY = ['Task']
 
 export function useCreateTask() {
+    //Trae la "caja de cachés" de TanStack Query
     const queryClient = useQueryClient()
 
+    //Cambia datos en el servidor
     return useMutation({
+        //Función que hace la petición
         mutationFn: (input: CreateTaskInput) => createTask(input),
+        //Se ejecuta cuando la petición termina
         onSettled: () => queryClient.invalidateQueries({ queryKey: TASKS_KEY }),
     })
 }
@@ -23,6 +27,7 @@ export function useUpdateTask() {
     })
 }
 
+//optimista
 export function useMoveTask() {
     const queryClient = useQueryClient()
 
@@ -30,12 +35,16 @@ export function useMoveTask() {
         mutationFn: ({ id, move }: { id: string, move: MoveTaskInput }) => moveTask(id, move),
         // Mueve la tarjeta en caché antes de que responda el servidor
         onMutate: async ({ id, move }) => {
+            //cancela cualquier descarga de lista que esté en camino
             await queryClient.cancelQueries({ queryKey: TASKS_KEY })
+            //toma una copia de seguridad de la foto, como un screenshot
             const previous = queryClient.getQueriesData<Task[]>({ queryKey: TASKS_KEY })
+            //cambia la foto, llamando a applymove
             queryClient.setQueriesData<Task[]>(
                 { queryKey: TASKS_KEY },
                 (tasks) => tasks && applyMove(tasks, id, move),
             )
+            //gaurda el screenshot para usarlo si algo sale mal
             return { previous }
         },
         // Si falla, vuelve al estado anterior

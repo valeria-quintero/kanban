@@ -9,6 +9,7 @@ import {
 } from '@kanban/shared';
 
 export class CreateTaskDto implements Partial<CreateTaskInput> {
+  //Recorta los espacios antes de validar
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()
   @MinLength(3)

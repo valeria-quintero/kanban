@@ -4,10 +4,11 @@ import { PrismaClient } from '../generated/prisma/client.js';
 
 @Injectable()
 export class PrismaService
-  extends PrismaClient
+  extends PrismaClient //Hereda todas sus funciones
   implements OnModuleInit, OnModuleDestroy
 {
   constructor() {
+    //construye ese cliente padre con el adaptador de Postgres y la DATABASE_URL
     super({
       adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
     });

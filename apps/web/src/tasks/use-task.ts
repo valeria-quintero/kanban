@@ -12,6 +12,7 @@ export function useTask(priorityOverride?: PriorityFilter) {
     //si no-usar el store
     const priority = priorityOverride ?? storePriority
 
+    //useQuery lee datos del servidor
     const query = useQuery({
         queryKey: ['Task', priority],
         queryFn: () => getTasks(priority),
