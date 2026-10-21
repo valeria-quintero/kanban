@@ -4,17 +4,23 @@ import Board from './components/Board'
 import Header from './components/Header'
 import NewTask from './components/NewTask'
 import { FilterBar } from './components/TaskFilters'
+import type { Task } from './types/task'
+import type { TaskStatus } from '@kanban/shared'
 
 function App() {
-  const [isNewTaskOpen, setIsNewTaskOpen] = useState(false)
+  const [editingTask, setEditingTask] = useState<Task | null>(null)
+  // null = modal de creación cerrado; si no, es el estado con el que se abre el formulario
+  const [newTaskStatus, setNewTaskStatus] = useState<TaskStatus | null>(null)
 
   return (
     <div>
-      {/* <TaskColumn title='Por hacer' tasks={mockTasks.filter((tarea) => tarea.status === 'BACKLOG')} status='BACKLOG' /> */}
-      <Header onNewTask={() => setIsNewTaskOpen(true)} />
+      <Header onNewTask={() => setNewTaskStatus('BACKLOG')} />
       <FilterBar />
-      <Board />
-      {isNewTaskOpen && <NewTask onClose={() => setIsNewTaskOpen(false)} />}
+      <Board onEditTask={setEditingTask} onAddTask={setNewTaskStatus} />
+      {newTaskStatus && (
+        <NewTask key={newTaskStatus} initialStatus={newTaskStatus} onClose={() => setNewTaskStatus(null)} />
+      )}
+      {editingTask && <NewTask key={editingTask.id} task={editingTask} onClose={() => setEditingTask(null)} />}
     </div>
   )
 }

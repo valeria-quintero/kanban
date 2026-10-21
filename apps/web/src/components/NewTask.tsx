@@ -1,25 +1,36 @@
-import { useState } from 'react';
+import { useState, type ChangeEvent } from 'react';
 import { PRIORITIES, PRIORITY_KEYS } from '../constants/priorities';
 import { PriorityBadge } from './PriorityBadge';
 import { STATUS_KEYS, STATUSES, type TaskStatus } from '../constants/status';
-import type { CreateTaskInput } from '../types/task';
+import type { CreateTaskInput, Task } from '../types/task';
+import { useCreateTask, useUpdateTask } from '../tasks/use-task-mutations';
 
 type NewTaskProps = {
   onClose: () => void
+  // Si se pasa una tarea, el formulario la edita en lugar de crear una nueva
+  task?: Task
+  // Estado preseleccionado al crear (la columna desde la que se pulsó "+")
+  initialStatus?: TaskStatus
 }
 
-export default function NewTask({ onClose }: NewTaskProps) {
-  
+export default function NewTask({ onClose, task, initialStatus }: NewTaskProps) {
+
+  const isEditing = !!task
+
   const [form, setForm] = useState<CreateTaskInput>({
-    title: '',
-    description: '',
-    status: 'BACKLOG',
-    priority: 'MEDIUM'
+    title: task?.title ?? '',
+    description: task?.description ?? '',
+    status: task?.status ?? initialStatus ?? 'BACKLOG',
+    priority: task?.priority ?? 'MEDIUM'
   })
 
   const [titleError, setTitleError] = useState<string | null>(null)
 
-  const handlerOnChangeTitle = (e) => {
+  const createTask = useCreateTask()
+  const updateTask = useUpdateTask()
+  const mutation = isEditing ? updateTask : createTask
+
+  const handlerOnChangeTitle = (e: ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, title:e.target.value })
     if (titleError) setTitleError(null)
   }
@@ -31,11 +42,11 @@ export default function NewTask({ onClose }: NewTaskProps) {
     return null
   }
 
-  const handlerOnChangeDescription = (e) => {
+  const handlerOnChangeDescription = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setForm({ ...form, description:e.target.value })
   }
 
-  const handlerOnChangeState = (e) => {
+  const handlerOnChangeState = (e: ChangeEvent<HTMLSelectElement>) => {
     setForm({ ...form, status:e.target.value as TaskStatus})
   }
 
@@ -45,7 +56,14 @@ export default function NewTask({ onClose }: NewTaskProps) {
       setTitleError(error)
       return
     }
-    console.log(form)
+
+    if (task) {
+      // El estado no se edita aquí: cambia al mover la tarjeta
+      const { title, description, priority } = form
+      updateTask.mutate({ id: task.id, input: { title, description, priority } }, { onSuccess: onClose })
+    } else {
+      createTask.mutate(form, { onSuccess: onClose })
+    }
   }
 
   return (
@@ -61,8 +79,10 @@ export default function NewTask({ onClose }: NewTaskProps) {
               </svg>
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-800">Nueva tarea</h2>
-              <p className="text-xs text-slate-500">Completa los datos para añadirla al tablero</p>
+              <h2 className="text-lg font-bold text-slate-800">{isEditing ? 'Editar tarea' : 'Nueva tarea'}</h2>
+              <p className="text-xs text-slate-500">
+                {isEditing ? 'Modifica los datos de la tarea' : 'Completa los datos para añadirla al tablero'}
+              </p>
             </div>
           </div>
           <button type="button" onClick={onClose} aria-label="Cerrar" className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors">
@@ -106,17 +126,18 @@ export default function NewTask({ onClose }: NewTaskProps) {
               rows={4}
               placeholder="Contexto, criterios de aceptación o enlaces relevantes"
               className="w-full px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
+              value={form.description}
               onChange={handlerOnChangeDescription}
             ></textarea>
           </div>
 
-          {/* Estado */}
-          <div>
+          {/* Estado (solo al crear: después cambia arrastrando la tarjeta) */}
+          {!isEditing && <div>
             <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
               Estado <span className="text-red-500">*</span>
             </label>
             <div className="relative">
-              <select className="w-full px-3.5 py-2.5 text-sm text-slate-800 bg-white border border-slate-200 rounded-lg appearance-none focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 pr-10" onChange={handlerOnChangeState}>
+              <select className="w-full px-3.5 py-2.5 text-sm text-slate-800 bg-white border border-slate-200 rounded-lg appearance-none focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 pr-10" value={form.status} onChange={handlerOnChangeState}>
                 {STATUS_KEYS.map((item) => {
                   return (
                     <option value={item} key={item} >
@@ -131,7 +152,7 @@ export default function NewTask({ onClose }: NewTaskProps) {
                 </svg>
               </div>
             </div>
-          </div>
+          </div>}
 
           {/* Prioridad */}
           <fieldset>
@@ -161,13 +182,15 @@ export default function NewTask({ onClose }: NewTaskProps) {
 
         {/* Pie de página */}
         <div className="flex items-center justify-between px-6 py-4 bg-slate-50 border-t border-slate-100">
-          <span className="text-xs text-slate-400">Se muestra al instante y se confirma con el servidor</span>
+          {mutation.isError
+            ? <span role="alert" className="text-xs text-red-600">No se pudo guardar la tarea. Inténtalo de nuevo.</span>
+            : <span className="text-xs text-slate-400">Se guarda en el servidor al confirmar</span>}
           <div className="flex items-center gap-3">
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors">
               Cancelar
             </button>
-            <button className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm" onClick={handlerSubmitForm}>
-              Crear tarea
+            <button type="button" disabled={mutation.isPending} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-60" onClick={handlerSubmitForm}>
+              {mutation.isPending ? 'Guardando…' : isEditing ? 'Guardar cambios' : 'Crear tarea'}
             </button>
           </div>
         </div>

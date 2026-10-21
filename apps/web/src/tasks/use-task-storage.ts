@@ -1,9 +1,9 @@
 import { create } from "zustand";
-import type { Priority } from "../constants/priorities";
+import type { PriorityFilter } from "../constants/priorities";
 
 interface TaskState {
-    priority: Priority | 'All',
-    priorityChange: (prty: Priority | 'All') => void,
+    priority: PriorityFilter,
+    priorityChange: (prty: PriorityFilter) => void,
 
     searchTerm: string,
     setSearchTerm: (term: string) => void
@@ -11,7 +11,7 @@ interface TaskState {
 
 export const useTaskStore = create<TaskState>() ((set) => ({
     priority: 'All',
-    priorityChange: (prty: Priority | 'All') => set(() => ({ priority: prty })),
+    priorityChange: (prty: PriorityFilter) => set(() => ({ priority: prty })),
 
     searchTerm: '',
     setSearchTerm: (term: string) => set(() => ({searchTerm: term}))

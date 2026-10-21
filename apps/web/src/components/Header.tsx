@@ -1,3 +1,4 @@
+import { useIsMutating } from "@tanstack/react-query";
 import { useTask } from "../tasks/use-task";
 
 type HeaderProps = {
@@ -6,6 +7,7 @@ type HeaderProps = {
 
 export default function Header({ onNewTask }: HeaderProps) {
     const { tasks } = useTask()
+    const isSaving = useIsMutating() > 0
     const totalTasks = tasks.length
     const completedTasks = tasks.filter((t) => t.status === 'DONE').length
 
@@ -15,8 +17,8 @@ export default function Header({ onNewTask }: HeaderProps) {
                 <div className="flex items-center gap-3">
                     <h1 className="text-xl font-bold text-slate-900">Tablero de tareas</h1>
                     <span className="inline-flex items-center gap-2 px-3 py-1 text-xs font-medium text-slate-600 bg-white border border-slate-200 rounded-full">
-                        <span className="size-2 rounded-full bg-emerald-500" aria-hidden="true" />
-                        Todo guardado
+                        <span className={`size-2 rounded-full ${isSaving ? 'bg-amber-400' : 'bg-emerald-500'}`} aria-hidden="true" />
+                        {isSaving ? 'Guardando…' : 'Todo guardado'}
                     </span>
                 </div>
                 <p className="mt-0.5 text-sm text-slate-500">
