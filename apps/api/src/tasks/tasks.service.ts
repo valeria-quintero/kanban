@@ -42,6 +42,8 @@ export class TasksService {
 
     // La tarjeta nueva va al final de su columna.
     const task = await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext('kanban:task-order'))`;
+
       // cuál es el orderIndex más grande en esa columna
       const { _max } = await tx.task.aggregate({
         where: { status },
@@ -83,6 +85,8 @@ export class TasksService {
    */
   async move(id: string, dto: MoveTaskDto): Promise<TaskDto> {
     const moved = await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext('kanban:task-order'))`;
+
       //Busca la tarjeta, si no existe = 404
       const task = await tx.task.findUnique({ where: { id } });
       if (!task) throw new NotFoundException(`Task ${id} not found`);
@@ -159,6 +163,8 @@ export class TasksService {
   /** Borra la tarjeta y cierra el hueco para que los índices sigan siendo 0..n-1. */
   async remove(id: string): Promise<void> {
     await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext('kanban:task-order'))`;
+
       const task = await tx.task.findUnique({ where: { id } });
       if (!task) throw new NotFoundException(`Task ${id} not found`);
 
@@ -171,4 +177,3 @@ export class TasksService {
     });
   }
 }
-

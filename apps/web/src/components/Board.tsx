@@ -8,6 +8,7 @@ import TaskColumn from "./TaskColumn";
 
 type BoardProps = {
     onEditTask: (task: Task) => void
+    onAddTask: (status: TaskStatus) => void
 }
 
 // destination.index cuenta solo las tarjetas visibles (con filtros activos),
@@ -20,7 +21,7 @@ function toColumnIndex(visible: Task[], column: Task[], index: number): number {
     return positionOf(visible[visible.length - 1]) + 1
 }
 
-export default function Board({ onEditTask }: BoardProps) {
+export default function Board({ onEditTask, onAddTask }: BoardProps) {
 
     const { tasks } = useTask()
     // Tablero sin filtrar por prioridad, para calcular los índices reales
@@ -62,7 +63,7 @@ export default function Board({ onEditTask }: BoardProps) {
         <DragDropContext onDragEnd={handleDragEnd}>
             <div className="grid gap-5 px-6 py-5 grid-cols-1 md:grid-cols-2 xl:grid-cols-4">
                 {STATUS_KEYS.map((status) => (
-                    <TaskColumn key={status} title={STATUSES[status].label} tasks={filteredTasks.filter((t) => t.status === status)} status={status} onEditTask={onEditTask}/>
+                    <TaskColumn key={status} title={STATUSES[status].label} tasks={filteredTasks.filter((t) => t.status === status)} status={status} onEditTask={onEditTask} onAddTask={onAddTask}/>
                 ))}
             </div>
         </DragDropContext>

@@ -9,16 +9,18 @@ type NewTaskProps = {
   onClose: () => void
   // Si se pasa una tarea, el formulario la edita en lugar de crear una nueva
   task?: Task
+  // Estado preseleccionado al crear (la columna desde la que se pulsó "+")
+  initialStatus?: TaskStatus
 }
 
-export default function NewTask({ onClose, task }: NewTaskProps) {
+export default function NewTask({ onClose, task, initialStatus }: NewTaskProps) {
 
   const isEditing = !!task
 
   const [form, setForm] = useState<CreateTaskInput>({
     title: task?.title ?? '',
     description: task?.description ?? '',
-    status: task?.status ?? 'BACKLOG',
+    status: task?.status ?? initialStatus ?? 'BACKLOG',
     priority: task?.priority ?? 'MEDIUM'
   })
 
