@@ -155,5 +155,20 @@ export class TasksService {
     }
     return error;
   }
+
+  /** Borra la tarjeta y cierra el hueco para que los índices sigan siendo 0..n-1. */
+  async remove(id: string): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      const task = await tx.task.findUnique({ where: { id } });
+      if (!task) throw new NotFoundException(`Task ${id} not found`);
+
+      await tx.task.delete({ where: { id } });
+
+      await tx.task.updateMany({
+        where: { status: task.status, orderIndex: { gt: task.orderIndex } },
+        data: { orderIndex: { decrement: 1 } },
+      });
+    });
+  }
 }
 

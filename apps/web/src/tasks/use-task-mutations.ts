@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CreateTaskInput, MoveTaskInput, Task, UpdateTaskInput } from "../types/task";
-import { createTask, moveTask, updateTask } from "./tasks.service";
+import { createTask, deleteTask, moveTask, updateTask } from "./tasks.service";
 
 // Prefijo común de todas las queries de useTask (['Task', priority])
 const TASKS_KEY = ['Task']
@@ -23,6 +23,30 @@ export function useUpdateTask() {
 
     return useMutation({
         mutationFn: ({ id, input }: { id: string, input: UpdateTaskInput }) => updateTask(id, input),
+        onSettled: () => queryClient.invalidateQueries({ queryKey: TASKS_KEY }),
+    })
+}
+
+export function useDeleteTask() {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: (id: string) => deleteTask(id),
+        // Quita la tarjeta de la caché antes de que responda el servidor
+        onMutate: async (id) => {
+            await queryClient.cancelQueries({ queryKey: TASKS_KEY })
+            const previous = queryClient.getQueriesData<Task[]>({ queryKey: TASKS_KEY })
+            queryClient.setQueriesData<Task[]>(
+                { queryKey: TASKS_KEY },
+                (tasks) => tasks && tasks.filter((t) => t.id !== id),
+            )
+            return { previous }
+        },
+        // Si falla, vuelve al estado anterior
+        onError: (_error, _id, context) => {
+            context?.previous.forEach(([key, data]) => queryClient.setQueryData(key, data))
+        },
+        // El refetch trae los orderIndex reales (la API cierra el hueco)
         onSettled: () => queryClient.invalidateQueries({ queryKey: TASKS_KEY }),
     })
 }
@@ -69,3 +93,4 @@ function applyMove(tasks: Task[], id: string, { status, newOrderIndex }: MoveTas
         .map((t) => (t.id === id ? { ...t, status, orderIndex } : t))
         .sort((a, b) => a.orderIndex - b.orderIndex)
 }
+

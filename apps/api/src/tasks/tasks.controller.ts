@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -41,5 +43,11 @@ export class TasksController {
     @Param('id', ParseUUIDPipe) id: string, 
     @Body() dto: MoveTaskDto) {
     return this.tasksService.move(id, dto);
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  remove(@Param('id', ParseUUIDPipe) id: string){
+    return this.tasksService.remove(id);
   }
 }

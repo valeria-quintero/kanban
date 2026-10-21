@@ -29,3 +29,9 @@ export async function moveTask(id: string, move:MoveTaskInput): Promise<Task> {
         body: JSON.stringify(move)
     })
 }
+
+export async function deleteTask(id: string): Promise<void> {
+    return request<void>(`/tasks/${id}`, { 
+        method: 'DELETE' 
+    })
+}

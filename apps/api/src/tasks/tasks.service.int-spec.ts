@@ -207,3 +207,34 @@ describe('TasksService.move — movimientos aleatorios', () => {
     }
   });
 });
+
+describe('TasksService.remove', () => {
+  it('borra la tarjeta y cierra el hueco', async () => {
+    const ids = await seed({ BACKLOG: ['A', 'B', 'C'], DONE: ['X', 'Y'] });
+
+    await service.remove(ids.B);
+    await expectContiguous();
+
+    expect(await board()).toMatchObject({ BACKLOG: ['A', 'C'], DONE: ['X', 'Y'] });
+  });
+
+  it('borra la última tarjeta sin tocar a las demás', async () => {
+    const ids = await seed({ BACKLOG: ['A', 'B', 'C'] });
+
+    await service.remove(ids.C);
+    await expectContiguous();
+
+    expect((await board()).BACKLOG).toEqual(['A', 'B']);
+  });
+
+  it('lanza NotFoundException y no modifica el tablero', async () => {
+    await seed({ BACKLOG: ['A', 'B'] });
+    const before = await board();
+
+    await expect(
+      service.remove('00000000-0000-4000-8000-000000000000'),
+    ).rejects.toBeInstanceOf(NotFoundException);
+
+    expect(await board()).toEqual(before);
+  });
+});
