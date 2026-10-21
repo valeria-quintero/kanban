@@ -30,16 +30,17 @@ export default function NewTask({ onClose, task, initialStatus }: NewTaskProps) 
   const updateTask = useUpdateTask()
   const mutation = isEditing ? updateTask : createTask
 
-  const handlerOnChangeTitle = (e: ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, title:e.target.value })
-    if (titleError) setTitleError(null)
-  }
-
+  
   const validateTitle = (title: string): string | null => {
     const value = title.trim()
     if (!value) return 'El título es obligatorio'
     if (value.length < 3) return 'El título debe tener al menos 3 caracteres'
     return null
+  }
+  
+  const handlerOnChangeTitle = (e: ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, title:e.target.value })
+    if (titleError) setTitleError(null)
   }
 
   const handlerOnChangeDescription = (e: ChangeEvent<HTMLTextAreaElement>) => {

@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, type QueryKey } from "@tanstack/react-query";
 import type { CreateTaskInput, MoveTaskInput, Task, UpdateTaskInput } from "../types/task";
 import { createTask, deleteTask, moveTask, updateTask } from "./tasks.service";
 
@@ -51,38 +51,59 @@ export function useDeleteTask() {
     })
 }
 
+const MOVE_KEY = ['moveTask']
+
+type MoveVariables = {
+    id: string
+    move: MoveTaskInput
+    //copia de seguridad de la caché para deshacer si falla
+    previous: [QueryKey, Task[] | undefined][]
+}
+
 //optimista
 export function useMoveTask() {
     const queryClient = useQueryClient()
 
-    return useMutation({
-        mutationFn: ({ id, move }: { id: string, move: MoveTaskInput }) => moveTask(id, move),
-        // Mueve la tarjeta en caché antes de que responda el servidor
-        onMutate: async ({ id, move }) => {
-            //cancela cualquier descarga de lista que esté en camino
-            await queryClient.cancelQueries({ queryKey: TASKS_KEY })
-            //toma una copia de seguridad de la foto, como un screenshot
-            const previous = queryClient.getQueriesData<Task[]>({ queryKey: TASKS_KEY })
-            //cambia la foto, llamando a applymove
-            queryClient.setQueriesData<Task[]>(
-                { queryKey: TASKS_KEY },
-                (tasks) => tasks && applyMove(tasks, id, move),
-            )
-            //gaurda el screenshot para usarlo si algo sale mal
-            return { previous }
-        },
+    const mutation = useMutation({
+        mutationKey: MOVE_KEY,
+        mutationFn: ({ id, move }: MoveVariables) => moveTask(id, move),
         // Si falla, vuelve al estado anterior
-        onError: (_error, _variables, context) => {
-            context?.previous.forEach(([key, data]) => queryClient.setQueryData(key, data))
+        onError: (_error, { previous }) => {
+            previous.forEach(([key, data]) => queryClient.setQueryData(key, data))
         },
-        // El refetch trae los orderIndex reales calculados por la API
-        onSettled: () => queryClient.invalidateQueries({ queryKey: TASKS_KEY }),
+        // El refetch trae los orderIndex reales calculados por la API.
+        // Con varios movimientos seguidos, solo refresca el último: si no, la
+        // respuesta de uno anterior pintaría un tablero ya desactualizado.
+        onSettled: () => {
+            if (queryClient.isMutating({ mutationKey: MOVE_KEY }) === 1) {
+                return queryClient.invalidateQueries({ queryKey: TASKS_KEY })
+            }
+        },
     })
+
+    // Cambia la caché antes de lanzar la petición. Ojo: TanStack avisa a los
+    // componentes con un setTimeout(0), así que esto solo no basta para dnd;
+    // por eso Board aplica además el movimiento a su estado local.
+    const mutate = ({ id, move }: { id: string, move: MoveTaskInput }) => {
+        //cancela cualquier descarga de lista en camino, sin restaurar sus datos
+        //(revert: true pisaría el cambio optimista con la caché anterior)
+        queryClient.cancelQueries({ queryKey: TASKS_KEY }, { revert: false })
+        //toma una copia de seguridad de la foto, como un screenshot
+        const previous = queryClient.getQueriesData<Task[]>({ queryKey: TASKS_KEY })
+        //cambia la foto, llamando a applyMove
+        queryClient.setQueriesData<Task[]>(
+            { queryKey: TASKS_KEY },
+            (tasks) => tasks && applyMove(tasks, id, move),
+        )
+        mutation.mutate({ id, move, previous })
+    }
+
+    return { ...mutation, mutate }
 }
 
 // Un índice fraccionario deja la tarjeta justo en su nueva posición sin
 // recalcular el resto. Funciona también en las listas filtradas por prioridad.
-function applyMove(tasks: Task[], id: string, { status, newOrderIndex }: MoveTaskInput): Task[] {
+export function applyMove(tasks: Task[], id: string, { status, newOrderIndex }: MoveTaskInput): Task[] {
     const moved = tasks.find((t) => t.id === id)
     if (!moved) return tasks
 
