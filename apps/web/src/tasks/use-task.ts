@@ -12,7 +12,7 @@ export function useTask(priorityOverride?: PriorityFilter) {
 
     const storePriority = useTaskStore((s) => s.priority)
 
-    //Si pasan una prioridad con el hook-usarla
+    //Si pasan una prioridad con el hook -> usarla
     //si no -> usar el store
     const priority = priorityOverride ?? storePriority
 

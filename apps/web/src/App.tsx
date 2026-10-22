@@ -3,6 +3,7 @@ import './App.css'
 import Board from './components/Board'
 import Header from './components/Header'
 import NewTask from './components/NewTask'
+import Toaster from './components/Toaster'
 import { FilterBar } from './components/TaskFilters'
 import type { Task } from './types/task'
 import type { TaskStatus } from '@kanban/shared'
@@ -21,6 +22,7 @@ function App() {
         <NewTask key={newTaskStatus} initialStatus={newTaskStatus} onClose={() => setNewTaskStatus(null)} />
       )}
       {editingTask && <NewTask key={editingTask.id} task={editingTask} onClose={() => setEditingTask(null)} />}
+      <Toaster />
     </div>
   )
 }

@@ -12,8 +12,7 @@ type BoardProps = {
     onAddTask: (status: TaskStatus) => void
 }
 
-// destination.index cuenta solo las tarjetas visibles (con filtros activos),
-// pero la API necesita la posición dentro de la columna completa.
+// destination.index cuenta solo las tarjetas visibles (con filtros activos), pero la API necesita la posición dentro de la columna completa.
 function toColumnIndex(visible: Task[], column: Task[], index: number): number {
     const positionOf = (task: Task) => column.findIndex((t) => t.id === task.id)
 
@@ -25,18 +24,17 @@ function toColumnIndex(visible: Task[], column: Task[], index: number): number {
 export default function Board({ onEditTask, onAddTask }: BoardProps) {
 
     const { tasks: serverTasks } = useTask()
+
     // Tablero sin filtrar por prioridad, para calcular los índices reales
     const { tasks: allTasks } = useTask('All')
     const searchTerm = useTaskStore((s) => s.searchTerm)
     const { mutate: moveTask } = useMoveTask()
 
-    // Copia local de las tareas. TanStack avisa de los cambios de caché un
-    // instante después (setTimeout), y dnd pinta justo al soltar: sin esta copia
-    // se ve la tarjeta volver a su sitio anterior antes de saltar al nuevo.
+    // Copia local de las tareas. 
+    // TanStack avisa de los cambios de caché un instante después (setTimeout), y dnd pinta justo al soltar: sin esta copia se ve la tarjeta volver a su sitio anterior antes de saltar al nuevo.
     const [tasks, setTasks] = useState(serverTasks)
     const [prevServerTasks, setPrevServerTasks] = useState(serverTasks)
-    // Cuando llegan datos nuevos de la caché (optimista, refetch o rollback),
-    // reemplazan a la copia local
+    // Cuando llegan datos nuevos de la caché (optimista, refetch o rollback), reemplazan a la copia local
     if (serverTasks !== prevServerTasks) {
         setPrevServerTasks(serverTasks)
         setTasks(serverTasks)

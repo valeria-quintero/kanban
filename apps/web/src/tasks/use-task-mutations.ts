@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient, type QueryKey } from "@tanstack/react-query";
 import type { CreateTaskInput, MoveTaskInput, Task, UpdateTaskInput } from "../types/task";
 import { createTask, deleteTask, moveTask, updateTask } from "./tasks.service";
+import { toast } from "./use-toast";
 
 // Prefijo común de todas las queries de useTask (['Task', priority])
 const TASKS_KEY = ['Task']
@@ -13,6 +14,7 @@ export function useCreateTask() {
     return useMutation({
         //Función que hace la petición
         mutationFn: (input: CreateTaskInput) => createTask(input),
+        onSuccess: () => toast.success('Tarea creada'),
         //Se ejecuta cuando la petición termina
         onSettled: () => queryClient.invalidateQueries({ queryKey: TASKS_KEY }),
     })
@@ -23,6 +25,7 @@ export function useUpdateTask() {
 
     return useMutation({
         mutationFn: ({ id, input }: { id: string, input: UpdateTaskInput }) => updateTask(id, input),
+        onSuccess: () => toast.success('Tarea actualizada'),
         onSettled: () => queryClient.invalidateQueries({ queryKey: TASKS_KEY }),
     })
 }
@@ -42,6 +45,7 @@ export function useDeleteTask() {
             )
             return { previous }
         },
+        onSuccess: () => toast.success('Tarea eliminada'),
         // Si falla, vuelve al estado anterior
         onError: (_error, _id, context) => {
             context?.previous.forEach(([key, data]) => queryClient.setQueryData(key, data))
