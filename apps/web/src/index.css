@@ -5,6 +5,15 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes toast-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+.toast-progress {
+  animation: toast-progress linear forwards;
+}
+
 .toast-in {
   animation: toast-in 0.2s ease-out;
 }

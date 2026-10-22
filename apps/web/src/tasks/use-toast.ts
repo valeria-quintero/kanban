@@ -14,7 +14,7 @@ interface ToastState {
     dismiss: (id: number) => void
 }
 
-const DURATION_MS = 3000
+export const TOAST_DURATION_MS = 3000
 let nextId = 0
 
 export const useToastStore = create<ToastState>() ((set, get) => ({
@@ -22,7 +22,7 @@ export const useToastStore = create<ToastState>() ((set, get) => ({
     show: (message, kind = 'success') => {
         const id = nextId++
         set((state) => ({ toasts: [...state.toasts, { id, kind, message }] }))
-        setTimeout(() => get().dismiss(id), DURATION_MS)
+        setTimeout(() => get().dismiss(id), TOAST_DURATION_MS)
     },
     dismiss: (id) => set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) }))
 }))

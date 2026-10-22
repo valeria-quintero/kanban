@@ -23,7 +23,8 @@ function toColumnIndex(visible: Task[], column: Task[], index: number): number {
 
 export default function Board({ onEditTask, onAddTask }: BoardProps) {
 
-    const { tasks: serverTasks } = useTask()
+    // Además de las tareas, se leen los estados de carga y error que ya devuelve useQuery
+    const { tasks: serverTasks, isLoading, isError, refetch } = useTask()
 
     // Tablero sin filtrar por prioridad, para calcular los índices reales
     const { tasks: allTasks } = useTask('All')
@@ -69,6 +70,22 @@ export default function Board({ onEditTask, onAddTask }: BoardProps) {
         //se pinta ya, en el mismo render en que dnd suelta la tarjeta
         setTasks((current) => applyMove(current, draggableId, move))
         moveTask({ id: draggableId, move })
+    }
+
+    // Estado de carga: se muestra un mensaje en lugar del tablero vacío
+    if (isLoading) {
+        return <p className="px-6 py-5 text-center">Cargando tareas...</p>
+    }
+
+    // Estado de error: se avisa al usuario y se ofrece reintentar
+    if (isError) {
+        return (
+            <div className="px-6 py-5 text-center">
+                <p>No se pudieron cargar las tareas.</p>
+                {/* Vuelve a lanzar la petición al servidor */}
+                <button type="button" className="mt-2 underline" onClick={() => refetch()}>Reintentar</button>
+            </div>
+        )
     }
 
     return(

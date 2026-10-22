@@ -69,6 +69,7 @@ export function useMoveTask() {
     const queryClient = useQueryClient()
 
     const mutation = useMutation({
+        //cuenta cuántos movimientos están en curso
         mutationKey: MOVE_KEY,
         mutationFn: ({ id, move }: MoveVariables) => moveTask(id, move),
         // Si falla, vuelve al estado anterior
@@ -89,7 +90,7 @@ export function useMoveTask() {
     // componentes con un setTimeout(0), así que esto solo no basta para dnd;
     // por eso Board aplica además el movimiento a su estado local.
     const mutate = ({ id, move }: { id: string, move: MoveTaskInput }) => {
-        //cancela cualquier descarga de lista en camino, sin restaurar sus datos
+        //cancela cualquier descarga de lista en camino
         //(revert: true pisaría el cambio optimista con la caché anterior)
         queryClient.cancelQueries({ queryKey: TASKS_KEY }, { revert: false })
         //toma una copia de seguridad de la foto, como un screenshot

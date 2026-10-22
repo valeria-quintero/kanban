@@ -25,6 +25,12 @@ export function useTask(priorityOverride?: PriorityFilter) {
     })
 
     return {
-        tasks: query.data ?? NO_TASKS
+        tasks: query.data ?? NO_TASKS,
+        // true solo mientras llegan los primeros datos (sin caché todavía)
+        isLoading: query.isPending,
+        // Error solo si no hay datos que mostrar: si un refetch falla pero ya hay datos, se conservan
+        isError: query.isError && query.data === undefined,
+        // Permite al usuario reintentar la petición desde la pantalla de error
+        refetch: query.refetch,
     }
 }
