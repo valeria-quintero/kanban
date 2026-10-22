@@ -2,14 +2,18 @@ import { useQuery } from "@tanstack/react-query";
 import { getTasks } from "./tasks.service";
 import type { PriorityFilter } from "../constants/priorities";
 import { useTaskStore } from "./use-task-storage";
+import type { Task } from "../types/task";
 
+// Siempre el mismo arreglo vacío: si fuera un [] nuevo en cada render,
+// el Board creería que los datos cambiaron en cada render
+const NO_TASKS: Task[] = []
 
 export function useTask(priorityOverride?: PriorityFilter) {
 
     const storePriority = useTaskStore((s) => s.priority)
 
-    //Si pasan una prioridad con el hook-usarla
-    //si no-usar el store
+    //Si pasan una prioridad con el hook -> usarla
+    //si no -> usar el store
     const priority = priorityOverride ?? storePriority
 
     //useQuery lee datos del servidor
@@ -21,6 +25,12 @@ export function useTask(priorityOverride?: PriorityFilter) {
     })
 
     return {
-        tasks: query.data ? query.data : []
+        tasks: query.data ?? NO_TASKS,
+        // true solo mientras llegan los primeros datos (sin caché todavía)
+        isLoading: query.isPending,
+        // Error solo si no hay datos que mostrar: si un refetch falla pero ya hay datos, se conservan
+        isError: query.isError && query.data === undefined,
+        // Permite al usuario reintentar la petición desde la pantalla de error
+        refetch: query.refetch,
     }
 }
